@@ -1,7 +1,31 @@
 const { Client, GatewayIntentBits, Partials, REST, Routes, ActivityType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+
+// Check if .env file exists, if not create it
+const envPath = path.join(__dirname, '.env');
+if (!fs.existsSync(envPath)) {
+    console.log('.env file not found. Creating template...');
+    try {
+        fs.writeFileSync(envPath, 'BOT_TOKEN=', 'utf8');
+        console.error('\x1b[31mERROR: Bot token is required!\x1b[0m');
+        console.error('Please edit the .env file and add your Discord bot token after BOT_TOKEN=');
+        process.exit(1);
+    } catch (error) {
+        console.error('Error creating .env file:', error);
+        process.exit(1);
+    }
+}
+
+// Load environment variables
 require('dotenv').config();
+
+// Check if BOT_TOKEN is empty or undefined
+if (!process.env.BOT_TOKEN || process.env.BOT_TOKEN === '') {
+    console.error('\x1b[31mERROR: Bot token is required!\x1b[0m');
+    console.error('Please edit the .env file and add your Discord bot token after BOT_TOKEN=');
+    process.exit(1);
+}
 
 // Check if config.json exists, if not create it from default_config.json
 const configPath = path.join(__dirname, 'config.json');
