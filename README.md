@@ -31,4 +31,4 @@ Bot: Fixed that for you
 Check this out! https://vxtwitter.com/username/status/12345
 
 ---
-Made with ❤️ using discord.js
+Made using discord.js
