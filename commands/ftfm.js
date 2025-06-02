@@ -1,4 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+
+// Load configuration
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.json'), 'utf8'));
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,17 +28,20 @@ module.exports = {
                 return;
             }
             
-            // Check if the link already contains vxtwitter.com
-            if (/vxtwitter\.com/i.test(link)) {
+            // Create a regex pattern from all alternative domains to check if the link already uses a fixed domain
+            const domainPattern = new RegExp(config.alternativeDomains.map(domain => domain.replace('.', '\\.')).join('|'), 'i');
+            
+            // Check if the link already contains any of the alternative domains
+            if (domainPattern.test(link)) {
                 await interaction.reply({
-                    content: 'This link is already using vxtwitter.com!',
+                    content: `This link is already using a fixed domain!`,
                     flags: 64 // Ephemeral flag
                 });
                 return;
             }
             
-            // Fix the link
-            const fixed = link.replace(/twitter\.com|x\.com/gi, 'vxtwitter.com');
+            // Fix the link using the configured domain
+            const fixed = link.replace(/twitter\.com|x\.com/gi, config.fixDomain);
             
             // Reply with the fixed link (not ephemeral so others can see it)
             await interaction.reply({

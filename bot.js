@@ -156,12 +156,15 @@ client.on('messageCreate', async (message) => {
         // Simple URL regex: looks for http(s):// or www. and at least one dot
         const urlRegex = /https?:\/\/\S+|www\.\S+/i;
         
-        // Skip if the message already contains vxtwitter.com links
-        if (/vxtwitter\.com/i.test(content)) return;
+        // Create a regex pattern from all alternative domains to skip messages that already contain fixed links
+        const domainPattern = new RegExp(config.alternativeDomains.map(domain => domain.replace('.', '\\.')).join('|'), 'i');
+        
+        // Skip if the message already contains any of the alternative domains
+        if (domainPattern.test(content)) return;
         
         if (urlRegex.test(content) && /twitter\.com|x\.com/i.test(content)) {
-            // Replace all instances of twitter.com or x.com with vxtwitter.com
-            const fixed = content.replace(/twitter\.com|x\.com/gi, 'vxtwitter.com');
+            // Replace all instances of twitter.com or x.com with the configured domain
+            const fixed = content.replace(/twitter\.com|x\.com/gi, config.fixDomain);
             await message.reply({
                 content: `${config.messages.fixedMessagePrefix}${fixed}`,
             });

@@ -1,9 +1,10 @@
 # VXDiscord Bot
 
-A Discord bot that automatically converts Twitter/X links to vxtwitter.com links for better embedding in Discord.
+A Discord bot that automatically converts Twitter/X links to vxtwitter.com or fxtwitter.com links for better embedding in Discord.
 
 ## Features
 - Automatically detects and fixes Twitter/X links in any channel it can see
+- Configurable fix domain (vxtwitter.com or fxtwitter.com)
 - Replies with "Fixed that for you" and the corrected message
 - Slash commands for user control:
   - `/ftfy` - Shows current status with a rich embed and interactive toggle button
@@ -37,11 +38,21 @@ The bot uses a configuration system with the following files:
 - `config.json` - Your local configuration (created automatically if missing)
 
 You can customize:
+- Fix domain (vxtwitter.com or fxtwitter.com)
 - Bot activity status and type
 - Auto-update settings (enable/disable, interval, timezone)
 - Database path
 - Message templates
 - UI colors
+
+### Changing the Fix Domain
+By default, the bot uses vxtwitter.com to fix Twitter/X links. If you prefer to use fxtwitter.com instead, simply change the `fixDomain` value in your config.json:
+
+```json
+"fixDomain": "fxtwitter.com"
+```
+
+The bot will automatically recognize both domains as "already fixed" links, so it won't try to fix links that are already using either domain.
 
 ## Permissions
 The bot needs the following Gateway Intents:
@@ -71,4 +82,4 @@ Check this out! https://vxtwitter.com/username/status/12345
 ```
 
 ---
-Made using discord.js & vxtwitter.com
+Made using discord.js & vxtwitter.com/fxtwitter.com

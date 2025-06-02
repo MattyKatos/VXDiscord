@@ -1,4 +1,6 @@
 {
+  "fixDomain": "vxtwitter.com",
+  "alternativeDomains": ["vxtwitter.com", "fxtwitter.com"],
   "bot": {
     "activity": "Tweets | /ftfy",
     "activityType": "WATCHING"
