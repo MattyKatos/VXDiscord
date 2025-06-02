@@ -1,0 +1,21 @@
+{
+  "bot": {
+    "activity": "Watching Tweets | /ftfy",
+    "activityType": "WATCHING"
+  },
+  "autoUpdate": {
+    "enabled": true,
+    "interval": "0 * * * *",
+    "initialDelaySeconds": 10,
+    "timezone": "America/New_York"
+  },
+  "database": {
+    "path": "./opt_out.db"
+  },
+  "messages": {
+    "fixedMessagePrefix": "Fixed that for you\n"
+  },
+  "embeds": {
+    "twitterBlue": "#1DA1F2"
+  }
+}
