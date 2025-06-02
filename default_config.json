@@ -1,6 +1,6 @@
 {
   "bot": {
-    "activity": "Watching Tweets | /ftfy",
+    "activity": "Tweets | /ftfy",
     "activityType": "WATCHING"
   },
   "autoUpdate": {
