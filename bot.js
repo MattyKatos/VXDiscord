@@ -19,7 +19,9 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     const content = message.content;
-    if (/twitter\.com|x\.com/i.test(content)) {
+    // Simple URL regex: looks for http(s):// or www. and at least one dot
+    const urlRegex = /https?:\/\/\S+|www\.\S+/i;
+    if (urlRegex.test(content) && /twitter\.com|x\.com/i.test(content)) {
         // Replace all instances of twitter.com or x.com with vxtwitter.com
         const fixed = content.replace(/twitter\.com|x\.com/gi, 'vxtwitter.com');
         await message.reply(`Fixed that for you\n${fixed}`);
