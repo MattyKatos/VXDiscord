@@ -44,7 +44,7 @@ module.exports = {
                             type: 2, // Button
                             style: 5, // Link style
                             label: 'Tip the Dev',
-                            url: 'https://streamelements.com/mattykatos/tip'
+                            url: 'https://coff.ee/mattykatos'
                         },
                         {
                             type: 2, // Button
@@ -127,7 +127,7 @@ module.exports = {
                             type: 2,
                             style: 5, // Link style
                             label: 'Tip the Dev',
-                            url: 'https://streamelements.com/mattykatos/tip'
+                            url: 'https://coff.ee/mattykatos'
                         },
                         {
                             type: 2,
@@ -182,7 +182,7 @@ module.exports = {
                             type: 2,
                             style: 5, // Link style
                             label: 'Tip the Dev',
-                            url: 'https://streamelements.com/mattykatos/tip'
+                            url: 'https://coff.ee/mattykatos'
                         },
                         {
                             type: 2,
