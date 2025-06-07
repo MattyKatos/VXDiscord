@@ -2,31 +2,6 @@ const { Client, GatewayIntentBits, Partials, REST, Routes, ActivityType } = requ
 const fs = require('fs');
 const path = require('path');
 
-// Check if .env file exists, if not create it
-const envPath = path.join(__dirname, '.env');
-if (!fs.existsSync(envPath)) {
-    console.log('.env file not found. Creating template...');
-    try {
-        fs.writeFileSync(envPath, 'BOT_TOKEN=', 'utf8');
-        console.error('\x1b[31mERROR: Bot token is required!\x1b[0m');
-        console.error('Please edit the .env file and add your Discord bot token after BOT_TOKEN=');
-        process.exit(1);
-    } catch (error) {
-        console.error('Error creating .env file:', error);
-        process.exit(1);
-    }
-}
-
-// Load environment variables
-require('dotenv').config();
-
-// Check if BOT_TOKEN is empty or undefined
-if (!process.env.BOT_TOKEN || process.env.BOT_TOKEN === '') {
-    console.error('\x1b[31mERROR: Bot token is required!\x1b[0m');
-    console.error('Please edit the .env file and add your Discord bot token after BOT_TOKEN=');
-    process.exit(1);
-}
-
 // Check if config.json exists, if not create it from default_config.json
 const configPath = path.join(__dirname, 'config.json');
 const defaultConfigPath = path.join(__dirname, 'default_config.json');
@@ -41,22 +16,33 @@ if (!fs.existsSync(configPath)) {
         console.log('Config file created successfully.');
     } catch (error) {
         console.error('Error creating config file:', error);
-        process.exit(1); // Exit if we can't create the config file
+        process.exit(1);
     }
 }
 
 // Load configuration
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+const defaultConfig = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf8'));
+
+// Import database helpers
+const { db, isUserOptedOut, incrementLinkFixCount } = require('./modules/database');
+
+// Check for bot token
+if (!config.bot.token || config.bot.token === 'YOUR_DISCORD_BOT_TOKEN_HERE') {
+    console.error('\x1b[31mERROR: Bot token is required!\x1b[0m');
+    console.error('Please add your Discord bot token to the bot.token field in config.json');
+    process.exit(1);
+}
+
+// Check config version
+const configOutOfDate = config.configVersion !== defaultConfig.configVersion;
 
 // Import modules
-const { db } = require('./modules/database');
 const { loadCommands } = require('./modules/commandHandler');
 const { initAutoUpdate } = require('./modules/updater');
 
 // Initialize auto-update feature
 initAutoUpdate();
-
-// Database is now imported from database.js
 
 // Initialize Discord client
 const client = new Client({
@@ -76,18 +62,23 @@ const { commands, commandsData } = loadCommands();
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
     
-    // Set the bot's activity status from config
+    // Set the bot's activity status, or show CONFIG OUT OF DATE if needed
     const activityType = config.bot.activityType === 'WATCHING' ? ActivityType.Watching : 
                          config.bot.activityType === 'PLAYING' ? ActivityType.Playing : 
                          config.bot.activityType === 'LISTENING' ? ActivityType.Listening : 
                          config.bot.activityType === 'COMPETING' ? ActivityType.Competing : 
                          ActivityType.Watching;
-    
-    client.user.setActivity(config.bot.activity, { type: activityType });
-    console.log(`Bot activity status set to: ${config.bot.activityType} ${config.bot.activity}`);
+
+    if (configOutOfDate) {
+        client.user.setActivity('UPDATE CONFIG', { type: activityType });
+        console.warn('\x1b[33mYour config.json is out of date! Please update it to match default_config.json.\x1b[0m');
+    } else {
+        client.user.setActivity(config.bot.activity, { type: activityType });
+        console.log(`Bot activity status set to: ${config.bot.activityType} ${config.bot.activity}`);
+    }
     
     try {
-        const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+        const rest = new REST({ version: '10' }).setToken(config.bot.token);
         console.log('Started refreshing application (/) commands.');
         
         await rest.put(
@@ -146,7 +137,7 @@ client.on('messageCreate', async (message) => {
     
     try {
         // Import the database functions
-        const { isUserOptedOut } = require('./modules/database');
+        
         
         // Check if user has opted out
         const isOptedOut = await isUserOptedOut(message.author.id);
@@ -155,19 +146,24 @@ client.on('messageCreate', async (message) => {
         const content = message.content;
         // Simple URL regex: looks for http(s):// or www. and at least one dot
         const urlRegex = /https?:\/\/\S+|www\.\S+/i;
-        
-        // Create a regex pattern from all alternative domains to skip messages that already contain fixed links
-        const domainPattern = new RegExp(config.alternativeDomains.map(domain => domain.replace('.', '\\.')).join('|'), 'i');
-        
-        // Skip if the message already contains any of the alternative domains
-        if (domainPattern.test(content)) return;
-        
-        if (urlRegex.test(content) && /twitter\.com|x\.com/i.test(content)) {
-            // Replace all instances of twitter.com or x.com with the configured domain
-            const fixed = content.replace(/twitter\.com|x\.com/gi, config.fixDomain);
-            await message.reply({
-                content: `${config.messages.fixedMessagePrefix}${fixed}`,
-            });
+
+        // Check each replacement rule
+        for (const rule of config.linkReplacements) {
+            // Skip if message already contains the replacement domain
+            const replacementDomainPattern = new RegExp(rule.replaceWith.replace('.', '\\.'), 'i');
+            if (replacementDomainPattern.test(content)) continue;
+
+            // Create a regex to match any of the source domains
+            const matchPattern = new RegExp(rule.matchDomains.map(domain => domain.replace('.', '\\.')).join('|'), 'gi');
+            if (urlRegex.test(content) && matchPattern.test(content)) {
+                // Replace all instances of the matched domains with the replacement domain
+                const fixed = content.replace(matchPattern, rule.replaceWith);
+                await incrementLinkFixCount(rule.matchDomains[0].includes('instagram') ? 'instagram' : 'twitter');
+                await message.reply({
+                    content: `${config.messages.fixedMessagePrefix}${fixed}`,
+                });
+                break; // Only reply once for the first applicable rule
+            }
         }
     } catch (error) {
         console.error('Error processing message:', error);
@@ -187,4 +183,4 @@ process.on('SIGINT', () => {
     });
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(config.bot.token);

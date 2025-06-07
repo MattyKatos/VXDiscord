@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
-const { isUserOptedOut, addUserToOptOut, removeUserFromOptOut } = require('../modules/database');
+const { isUserOptedOut, addUserToOptOut, removeUserFromOptOut, getLinkFixCount } = require('../modules/database');
 const fs = require('fs');
 const path = require('path');
 
@@ -9,44 +9,23 @@ const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.jso
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ftfy')
-        .setDescription('Manage your Twitter/X link fixing preferences')
-        .addStringOption(option =>
-            option.setName('action')
-                .setDescription('Action to perform')
-                .setRequired(false)
-                .addChoices(
-                    { name: 'start', value: 'start' },
-                    { name: 'stop', value: 'stop' }
-                )
-        ),
+        .setDescription('Manage your Twitter/X link fixing preferences'),
     async execute(interaction) {
+    // Get stats for links fixed
+    const twitterCount = await getLinkFixCount('twitter');
+    const instagramCount = await getLinkFixCount('instagram');
+
         const { user } = interaction;
-        const action = interaction.options.getString('action');
-        
+
         try {
             // Check current status
             const isOptedOut = await isUserOptedOut(user.id);
             
-            if (action === 'stop') {
-                // Opt out
-                await addUserToOptOut(user.id);
-                await interaction.reply({ 
-                    content: 'You have opted out of automatic Twitter/X link fixing.', 
-                    flags: 64 // Ephemeral flag (1 << 6)
-                });
-            } else if (action === 'start') {
-                // Opt in
-                await removeUserFromOptOut(user.id);
-                await interaction.reply({ 
-                    content: 'You have opted in to automatic Twitter/X link fixing.', 
-                    flags: 64 // Ephemeral flag (1 << 6)
-                });
-            } else {
-                // Show status (no action provided)
-                const status = isOptedOut ? 'OFF' : 'ON';
-                
-                // Create a single row with all buttons
-                const buttonRow = {
+            // Always show status (buttons now handle opt-in/out)
+            const status = isOptedOut ? 'OFF' : 'ON';
+            
+            // Create a single row with all buttons
+            const buttonRow = {
                     type: 1, // Action Row
                     components: [
                         {
@@ -76,15 +55,22 @@ module.exports = {
                     ]
                 };
                 
-                // Create an embed for better appearance
+                // Build a list of active redirects (current replaceWith for each rule)
+                const activeRedirects = config.linkReplacements.map(rule => {
+                    return `${rule.matchDomains.join(', ')} → **${rule.replaceWith}**`;
+                }).join('\n');
+
+                // Embed - Default
                 const embed = new EmbedBuilder()
-                    .setColor(config.embeds.twitterBlue) // Twitter blue color from config
+                    .setColor(config.embeds.color) // Twitter blue color from config
                     .setTitle('FTFY (Fixed That For You)')
-                    .setDescription('Automatically replaces Twitter/X links with vxtwitter links to fix embeds.')
+                    .setDescription('Automatically replaces supported social links with the currently active redirect domains for better embeds.')
                     .addFields(
                         { name: 'Status', value: `**${status}**`, inline: true },
                         { name: 'Links', value: isOptedOut ? 'Will not be automatically fixed' : 'Will be automatically fixed', inline: true },
-                        { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true }                            
+                        { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true },
+                        { name: 'Active Redirects', value: activeRedirects, inline: false },
+                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**`, inline: false }
                     )
                     .setFooter({ text: 'Use the buttons below to change your settings' })
                     .setTimestamp();
@@ -95,7 +81,7 @@ module.exports = {
                     flags: 64 // Ephemeral flag (1 << 6)
                 });
             }
-        } catch (error) {
+        catch (error) {
             console.error(`Error handling FTFY command:`, error);
             await interaction.reply({ 
                 content: 'There was an error processing your request.', 
@@ -103,10 +89,19 @@ module.exports = {
             });
         }
     },
+
     async handleButton(interaction) {
+    // Get stats for links fixed
+    const twitterCount = await getLinkFixCount('twitter');
+    const instagramCount = await getLinkFixCount('instagram');
+
         try {
             const { user } = interaction;
             const isOptedOut = await isUserOptedOut(user.id);
+            // Build a list of active redirects (current replaceWith for each rule)
+            const activeRedirects = config.linkReplacements.map(rule => {
+                return `${rule.matchDomains.join(', ')} → **${rule.replaceWith}**`;
+            }).join('\n');
             
             if (isOptedOut) {
                 // User is currently opted out, so opt them in
@@ -143,15 +138,17 @@ module.exports = {
                     ]
                 };
                 
-                // Create an embed for better appearance
+                // Embed - Opted In
                 const embed = new EmbedBuilder()
-                    .setColor(config.embeds.twitterBlue) // Twitter blue color from config
+                    .setColor(config.embeds.color) // Twitter blue color from config
                     .setTitle('FTFY (Fixed That For You)')
-                    .setDescription('Automatically replaces Twitter/X links with vxtwitter links to fix embeds.')
+                    .setDescription('Automatically replaces supported social links with the currently active redirect domains for better embeds.')
                     .addFields(
-                        { name: 'Status', value: '**ON**', inline: true },
-                        { name: 'Links', value: 'Will be automatically fixed', inline: true },
-                        { name: 'Data', value: 'No data stored', inline: true },
+                        { name: 'Status', value: `**ON**`, inline: true },
+                        { name: 'Links', value: isOptedOut ? 'Will not be automatically fixed' : 'Will be automatically fixed', inline: true },
+                        { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true },
+                        { name: 'Active Redirects', value: activeRedirects, inline: false },
+                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**`, inline: false }
                     )
                     .setFooter({ text: 'Use the buttons below to change your settings' })
                     .setTimestamp();
@@ -196,15 +193,17 @@ module.exports = {
                     ]
                 };
                 
-                // Create an embed for better appearance
+                // Embed - Opted Out
                 const embed = new EmbedBuilder()
-                    .setColor(config.embeds.twitterBlue) // Twitter blue color from config
+                    .setColor(config.embeds.color) // Twitter blue color from config
                     .setTitle('FTFY (Fixed That For You)')
-                    .setDescription('Automatically replaces Twitter/X links with vxtwitter links to fix embeds.')
+                    .setDescription('Automatically replaces supported social links with the currently active redirect domains for better embeds.')
                     .addFields(
-                        { name: 'Status', value: '**OFF**', inline: true },
-                        { name: 'Links', value: 'Will not be automatically fixed', inline: true },
-                        { name: 'Data', value: 'UID is stored', inline: true },
+                        { name: 'Status', value: `**OFF**`, inline: true },
+                        { name: 'Links', value: isOptedOut ? 'Will not be automatically fixed' : 'Will be automatically fixed', inline: true },
+                        { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true },
+                        { name: 'Active Redirects', value: activeRedirects, inline: false },
+                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**`, inline: false }
                     )
                     .setFooter({ text: 'Use the buttons below to change your settings' })
                     .setTimestamp();

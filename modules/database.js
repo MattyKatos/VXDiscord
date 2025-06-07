@@ -11,14 +11,27 @@ const db = new sqlite3.Database(config.database.path, (err) => {
         console.error('Error opening database:', err.message);
     } else {
         console.log('Connected to the opt_out database.');
-        // Create table if it doesn't exist
+        // Create opted_out_users table if it doesn't exist
         db.run(`CREATE TABLE IF NOT EXISTS opted_out_users (
             user_id TEXT PRIMARY KEY
         )`, (err) => {
             if (err) {
-                console.error('Error creating table:', err.message);
+                console.error('Error creating opted_out_users table:', err.message);
             } else {
                 console.log('Opted-out users table ready.');
+            }
+        });
+        // Create link_fixes table if it doesn't exist
+        db.run(`CREATE TABLE IF NOT EXISTS link_fixes (
+            platform TEXT PRIMARY KEY,
+            count INTEGER DEFAULT 0
+        )`, (err) => {
+            if (err) {
+                console.error('Error creating link_fixes table:', err.message);
+            } else {
+                console.log('Link fixes table ready.');
+                // Initialize rows for twitter and instagram if not present
+                db.run(`INSERT OR IGNORE INTO link_fixes (platform, count) VALUES ('twitter', 0), ('instagram', 0)`);
             }
         });
     }
@@ -73,9 +86,35 @@ process.on('SIGINT', () => {
     });
 });
 
+function incrementLinkFixCount(platform) {
+    return new Promise((resolve, reject) => {
+        db.run('UPDATE link_fixes SET count = count + 1 WHERE platform = ?', [platform], function(err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(this.changes > 0);
+            }
+        });
+    });
+}
+
+function getLinkFixCount(platform) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT count FROM link_fixes WHERE platform = ?', [platform], (err, row) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row ? row.count : 0);
+            }
+        });
+    });
+}
+
 module.exports = {
     db,
     isUserOptedOut,
     addUserToOptOut,
-    removeUserFromOptOut
+    removeUserFromOptOut,
+    incrementLinkFixCount,
+    getLinkFixCount
 };

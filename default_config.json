@@ -1,9 +1,22 @@
 {
-  "fixDomain": "vxtwitter.com",
-  "alternativeDomains": ["vxtwitter.com", "fxtwitter.com"],
+  "configVersion": 3,
+  "linkReplacements": [
+    {
+      "matchDomains": ["twitter.com", "x.com"],
+      "replaceWith": "vxtwitter.com",
+      "alternativeDomains": ["vxtwitter.com", "fxtwitter.com"]
+    },
+    {
+      "matchDomains": ["instagram.com"],
+      "replaceWith": "instagramez.com",
+      "alternativeDomains": ["instagramez.com", "ddinstagram.com"]
+    }
+  ],
   "bot": {
-    "activity": "Tweets | /ftfy",
-    "activityType": "WATCHING"
+    "token": "YOUR_DISCORD_BOT_TOKEN_HERE",
+    "activity": "for links | /ftfy",
+    "activityType": "WATCHING",
+    "activityOptions": ["WATCHING", "PLAYING", "LISTENING", "COMPETING"]
   },
   "autoUpdate": {
     "enabled": true,
@@ -12,12 +25,12 @@
     "timezone": "America/New_York"
   },
   "database": {
-    "path": "./opt_out.db"
+    "path": "./ftfy.db"
   },
   "messages": {
     "fixedMessagePrefix": "Fixed that for you\n"
   },
   "embeds": {
-    "twitterBlue": "#1DA1F2"
+    "color": "#1DA1F2"
   }
 }
