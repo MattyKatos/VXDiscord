@@ -39,7 +39,10 @@ module.exports = {
                     // Replace all match domains with the chosen replacement
                     const globalMatchPattern = new RegExp(rule.matchDomains.map(domain => domain.replace('.', '\\.')).join('|'), 'gi');
                     const fixed = link.replace(globalMatchPattern, rule.replaceWith);
-                    await incrementLinkFixCount(rule.matchDomains[0].includes('instagram') ? 'instagram' : 'twitter');
+                    let platform = 'twitter';
+if (rule.matchDomains[0].includes('instagram')) platform = 'instagram';
+if (rule.matchDomains[0].includes('tiktok')) platform = 'tiktok';
+await incrementLinkFixCount(platform);
                     await interaction.reply({
                         content: fixed
                     });

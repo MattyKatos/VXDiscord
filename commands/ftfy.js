@@ -9,11 +9,12 @@ const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.jso
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ftfy')
-        .setDescription('Manage your Twitter/X link fixing preferences'),
+        .setDescription('Manage your Twitter, Instagram, and TikTok link fixing preferences'),
     async execute(interaction) {
     // Get stats for links fixed
     const twitterCount = await getLinkFixCount('twitter');
     const instagramCount = await getLinkFixCount('instagram');
+    const tiktokCount = await getLinkFixCount('tiktok');
 
         const { user } = interaction;
 
@@ -64,13 +65,13 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setColor(config.embeds.color) // Twitter blue color from config
                     .setTitle('FTFY (Fixed That For You)')
-                    .setDescription('Automatically replaces supported social links with the currently active redirect domains for better embeds.')
+                    .setDescription('Automatically replaces supported social links (Twitter, Instagram, TikTok) with the currently active redirect domains for better embeds.')
                     .addFields(
                         { name: 'Status', value: `**${status}**`, inline: true },
                         { name: 'Links', value: isOptedOut ? 'Will not be automatically fixed' : 'Will be automatically fixed', inline: true },
                         { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true },
                         { name: 'Active Redirects', value: activeRedirects, inline: false },
-                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**`, inline: false }
+                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**\nTikTok: **${tiktokCount}**`, inline: false }
                     )
                     .setFooter({ text: 'Use the buttons below to change your settings' })
                     .setTimestamp();
@@ -94,6 +95,7 @@ module.exports = {
     // Get stats for links fixed
     const twitterCount = await getLinkFixCount('twitter');
     const instagramCount = await getLinkFixCount('instagram');
+    const tiktokCount = await getLinkFixCount('tiktok');
 
         try {
             const { user } = interaction;
@@ -148,7 +150,7 @@ module.exports = {
                         { name: 'Links', value: isOptedOut ? 'Will not be automatically fixed' : 'Will be automatically fixed', inline: true },
                         { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true },
                         { name: 'Active Redirects', value: activeRedirects, inline: false },
-                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**`, inline: false }
+                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**\nTikTok: **${tiktokCount}**`, inline: false }
                     )
                     .setFooter({ text: 'Use the buttons below to change your settings' })
                     .setTimestamp();
@@ -203,7 +205,7 @@ module.exports = {
                         { name: 'Links', value: isOptedOut ? 'Will not be automatically fixed' : 'Will be automatically fixed', inline: true },
                         { name: 'Data', value: isOptedOut ? 'UID is stored' : 'No data stored', inline: true },
                         { name: 'Active Redirects', value: activeRedirects, inline: false },
-                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**`, inline: false }
+                        { name: 'Links Fixed (Global)', value: `Twitter: **${twitterCount}**\nInstagram: **${instagramCount}**\nTikTok: **${tiktokCount}**`, inline: false }
                     )
                     .setFooter({ text: 'Use the buttons below to change your settings' })
                     .setTimestamp();

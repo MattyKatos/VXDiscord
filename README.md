@@ -3,12 +3,12 @@
 A Discord bot that automatically replaces supported social links with the currently active redirect domains for better embeds in Discord.
 
 ## Features
-- Automatically detects and fixes Twitter/X and Instagram links in any channel it can see
-- Configurable fix domains (vxtwitter.com, fxtwitter.com, or alternative Instagram domains)
+- Automatically detects and fixes Twitter/X, Instagram, and TikTok links in any channel it can see
+- Configurable fix domains (vxtwitter.com, fxtwitter.com, bibliogram.art, vxtiktok.com, tfxktok.com, tnktok.com, etc)
 - Replies with "Fixed that for you" and the corrected message
 - Slash commands for user control:
   - `/ftfy` - Shows plugin and user status with a rich embed and **interactive toggle button** to opt-in/out
-  - `/ftfm link` - Allows users to fix a specific Twitter/X or Instagram link manually
+  - `/ftfm link` - Allows users to fix a specific Twitter/X, Instagram, or TikTok link manually
 - User opt-out system with SQLite database
 - Auto-update feature that checks for GitHub updates once per hour
 - Config Version checker sets bot status to "UPDATE CONFIG" if config.json is out of date
@@ -39,7 +39,7 @@ The bot uses a configuration system with the following files:
 - `config.json` - Your local configuration (created automatically if missing)
 
 You can customize:
-- Fix domains for Twitter/X and Instagram (e.g. vxtwitter.com, fxtwitter.com, bibliogram.art, etc)
+- Fix domains for Twitter/X, Instagram, and TikTok (e.g. vxtwitter.com, fxtwitter.com, bibliogram.art, vxtiktok.com, tfxktok.com, tnktok.com, etc)
 - Bot activity status and type
 - Auto-update settings (enable/disable, interval, timezone)
 - Database path
@@ -47,19 +47,24 @@ You can customize:
 - UI colors
 
 ### Changing the Fix Domains
-By default, the bot uses vxtwitter.com to fix Twitter/X links. If you prefer to use fxtwitter.com or another supported domain (including Instagram alternatives), simply update the `linkReplacements` array in your config.json:
+By default, the bot uses vxtwitter.com to fix Twitter/X links, bibliogram.art for Instagram, and vxtiktok.com for TikTok. If you prefer to use other supported domains (including alternatives), simply update the `linkReplacements` array in your config.json:
 
 ```json
 "linkReplacements": [
   {
     "matchDomains": ["twitter.com", "x.com"],
     "replaceWith": "vxtwitter.com",
-    ...
+    "alternativeDomains": ["vxtwitter.com", "fxtwitter.com"]
   },
   {
     "matchDomains": ["instagram.com"],
     "replaceWith": "bibliogram.art",
-    ...
+    "alternativeDomains": ["ddinstagram.com", "imginn.com"]
+  },
+  {
+    "matchDomains": ["tiktok.com"],
+    "replaceWith": "vxtiktok.com",
+    "alternativeDomains": ["tfxktok.com", "tnktok.com"]
   }
 ]
 ```

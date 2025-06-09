@@ -158,7 +158,10 @@ client.on('messageCreate', async (message) => {
             if (urlRegex.test(content) && matchPattern.test(content)) {
                 // Replace all instances of the matched domains with the replacement domain
                 const fixed = content.replace(matchPattern, rule.replaceWith);
-                await incrementLinkFixCount(rule.matchDomains[0].includes('instagram') ? 'instagram' : 'twitter');
+                let platform = 'twitter';
+if (rule.matchDomains[0].includes('instagram')) platform = 'instagram';
+if (rule.matchDomains[0].includes('tiktok')) platform = 'tiktok';
+await incrementLinkFixCount(platform);
                 await message.reply({
                     content: `${config.messages.fixedMessagePrefix}${fixed}`,
                 });

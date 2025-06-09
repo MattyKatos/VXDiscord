@@ -1,5 +1,5 @@
 {
-  "configVersion": 3,
+  "configVersion": 4,
   "linkReplacements": [
     {
       "matchDomains": ["twitter.com", "x.com"],
@@ -10,6 +10,11 @@
       "matchDomains": ["instagram.com"],
       "replaceWith": "instagramez.com",
       "alternativeDomains": ["instagramez.com", "ddinstagram.com"]
+    },
+    {
+      "matchDomains": ["tiktok.com"],
+      "replaceWith": "vxtiktok.com",
+      "alternativeDomains": ["tfxktok.com", "tnktok.com"]
     }
   ],
   "bot": {

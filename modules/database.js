@@ -30,8 +30,8 @@ const db = new sqlite3.Database(config.database.path, (err) => {
                 console.error('Error creating link_fixes table:', err.message);
             } else {
                 console.log('Link fixes table ready.');
-                // Initialize rows for twitter and instagram if not present
-                db.run(`INSERT OR IGNORE INTO link_fixes (platform, count) VALUES ('twitter', 0), ('instagram', 0)`);
+                // Initialize rows for twitter, instagram, and tiktok if not present
+                db.run(`INSERT OR IGNORE INTO link_fixes (platform, count) VALUES ('twitter', 0), ('instagram', 0), ('tiktok', 0)`);
             }
         });
     }
