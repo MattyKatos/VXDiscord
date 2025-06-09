@@ -4,7 +4,7 @@ A Discord bot that automatically replaces supported social links with the curren
 
 ## Features
 - Automatically detects and fixes Twitter/X, Instagram, and TikTok links in any channel it can see
-- Configurable fix domains (vxtwitter.com, fxtwitter.com, bibliogram.art, vxtiktok.com, tfxktok.com, tnktok.com, etc)
+- Configurable fix domains
 - Replies with "Fixed that for you" and the corrected message
 - Slash commands for user control:
   - `/ftfy` - Shows plugin and user status with a rich embed and **interactive toggle button** to opt-in/out
@@ -39,7 +39,7 @@ The bot uses a configuration system with the following files:
 - `config.json` - Your local configuration (created automatically if missing)
 
 You can customize:
-- Fix domains for Twitter/X, Instagram, and TikTok (e.g. vxtwitter.com, fxtwitter.com, bibliogram.art, vxtiktok.com, tfxktok.com, tnktok.com, etc)
+- Fix domains for Twitter/X, Instagram, and TikTok
 - Bot activity status and type
 - Auto-update settings (enable/disable, interval, timezone)
 - Database path
@@ -58,8 +58,8 @@ By default, the bot uses vxtwitter.com to fix Twitter/X links, bibliogram.art fo
   },
   {
     "matchDomains": ["instagram.com"],
-    "replaceWith": "bibliogram.art",
-    "alternativeDomains": ["ddinstagram.com", "imginn.com"]
+    "replaceWith": "instagramez.com",,
+    "alternativeDomains": ["instagramez.com", "ddinstagram.com"]
   },
   {
     "matchDomains": ["tiktok.com"],
