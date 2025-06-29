@@ -1,0 +1,15 @@
+services:
+  bot:
+    build: .
+    container_name: vxdiscord-bot
+    restart: unless-stopped
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./vxdiscord.sqlite:/app/vxdiscord.sqlite
+    # Uncomment and set if you want to override the default command
+    # command: ["npm", "start"]
+    # environment:
+    #   - NODE_ENV=production
+    #   - OTHER_ENV_VAR=value
+    # ports:
+    #   - "3000:3000" # Uncomment if your bot exposes a web dashboard

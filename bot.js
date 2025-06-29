@@ -39,10 +39,6 @@ const configOutOfDate = config.configVersion !== defaultConfig.configVersion;
 
 // Import modules
 const { loadCommands } = require('./modules/commandHandler');
-const { initAutoUpdate } = require('./modules/updater');
-
-// Initialize auto-update feature
-initAutoUpdate();
 
 // Initialize Discord client
 const client = new Client({
